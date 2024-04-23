@@ -5,6 +5,7 @@ Midi Hand Tracker is a simple script that uses Mediapipe, OpenCV, and Mido to tu
 ## Dependencies & Usage
 
 Libraries
+- Picamera2
 - Mediapipe
 - OpenCV
 - Mido
@@ -14,7 +15,7 @@ execute
 ``export DISPLAY=:0``
 in terminal prior to running
 
-
+Built using Picamera2 library rather OpenCV video streaming, as this was initially built using an Arducam
 
 ## Future iterations
 
@@ -23,3 +24,4 @@ in terminal prior to running
 - add CC support
 - add support for multi-hand
 - add various gesture support
+- add auto-focus support

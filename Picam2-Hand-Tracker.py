@@ -2,14 +2,13 @@
 # from sklearn import preprocessing
 import mediapipe
 import cv2
-from picamera2 import Picamera2, Preview
+from picamera2 import Picamera2
 import mido
-import time
 
 #Configuring picam2 stream
 
 picam2 = Picamera2()
-picam2.preview_configuration.main.size = (640,480)
+picam2.preview_configuration.main.size = (720,480)
 picam2.preview_configuration.main.format = "RGB888"
 picam2.preview_configuration.align()
 picam2.configure("preview")
@@ -32,7 +31,7 @@ def mapToNote(value, min_value, max_value, min_result, max_result):
  return midiValue
 
 min_value = 0
-max_value = 640
+max_value = 720
 min_result = 50
 max_result = 80
 
@@ -45,6 +44,10 @@ max_value2 = 480
 min_result2 = 127
 max_result2 = 0
 
+# Midi variables
+midiChannel = 1
+
+
 #Add confidence values and extra settings to MediaPipe hand tracking. As we are using a live video stream this is not a static
 #image mode, confidence values in regards to overall detection and tracking and we will only let two hands be tracked at the same time
 #More hands can be tracked at the same time if desired but will slow down the system
@@ -54,7 +57,7 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
      while True:
            im = picam2.capture_array()
            #Unedit the below line if your live feed is produced upsidedown
-        #    im = cv2.flip(im, flipCode = -1)
+           im = cv2.flip(im, flipCode = 0)
            
            
            #produces the hand framework overlay ontop of the hand, you can choose the colour here too)
@@ -66,7 +69,7 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                 drawingModule.draw_landmarks(im, handLandmarks, handsModule.HAND_CONNECTIONS)
                 for point in handsModule.HandLandmark:
                     normalizedLandmark = handLandmarks.landmark[point]
-                    pixelCoordinatesLandmark= drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x, normalizedLandmark.y, 640, 480)
+                    pixelCoordinatesLandmark= drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x, normalizedLandmark.y, 720, 480)
                     if point == 8:
                         if pixelCoordinatesLandmark != None:
                             IndexTipX = pixelCoordinatesLandmark[0]
@@ -75,8 +78,8 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                             IndexTipY = pixelCoordinatesLandmark[1]
                             velVar = int(mapToVel(IndexTipY, min_value2, max_value2, min_result2, max_result2))
                             # print(velVar)
-                            noteOnMsg = mido.Message('note_on', channel=1, note=noteVar, velocity=velVar)
-                            noteOffMsg = mido.Message('note_off', channel=1, note=noteVar)
+                            noteOnMsg = mido.Message('note_on', channel=midiChannel, note=noteVar, velocity=velVar)
+                            noteOffMsg = mido.Message('note_off', channel=midiChannel, note=noteVar)
                             port.send(noteOnMsg)
                             port.send(noteOffMsg)
             
