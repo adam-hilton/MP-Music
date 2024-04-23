@@ -25,3 +25,4 @@ Built using Picamera2 library rather OpenCV video streaming, as this was initial
 - add support for multi-hand
 - add various gesture support
 - add auto-focus support
+- refactor to be most compatible with RPi cam module v3
