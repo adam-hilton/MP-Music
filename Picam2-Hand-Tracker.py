@@ -4,17 +4,24 @@ import mediapipe
 import cv2
 from picamera2 import Picamera2
 import mido
+from libcamera import controls
+import screeninfo
+
+# get size of screen
+screen = screeninfo.get_monitors()[0]
 
 #Configuring picam2 stream
 
 picam2 = Picamera2()
 picam2.preview_configuration.main.size = (720,480)
+
 picam2.preview_configuration.main.format = "RGB888"
 picam2.preview_configuration.align()
 picam2.configure("preview")
 
 #startpicam2 stream
 picam2.start()
+picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
 
 # set port to pisound DIN5
 port = mido.open_output('pisound MIDI PS-1MJPEPE')
@@ -51,7 +58,7 @@ midiChannel = 1
 #Add confidence values and extra settings to MediaPipe hand tracking. As we are using a live video stream this is not a static
 #image mode, confidence values in regards to overall detection and tracking and we will only let two hands be tracked at the same time
 #More hands can be tracked at the same time if desired but will slow down the system
-with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=1) as hands:
+with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
 
 #Create an infinite loop which will produce the live feed to our desktop and that will search for hands
      while True:
@@ -88,7 +95,12 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
            #Below shows the current frame to the desktop 
         #    cv2.namedWindow("foo", cv2.WINDOW_NORMAL)
         #    cv2.setWindowProperty("foo", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-           cv2.imshow("Frame", im);
+           window_name = "Frame"
+           cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+           cv2.moveWindow(window_name, screen.x - 1, screen.y - 1)
+           cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN,
+                          cv2.WINDOW_FULLSCREEN)
+           cv2.imshow(window_name, im);
            key = cv2.waitKey(1) & 0xFF
         
            #Below states that if the |q| is press on the keyboard it will stop the system
