@@ -1,11 +1,18 @@
 #Import the necessary Packages for this software to run
 # from sklearn import preprocessing
 import mediapipe
+import os
 import cv2
 from picamera2 import Picamera2
 import mido
 from libcamera import controls
 import screeninfo
+
+# Set the environment for framebuffer
+os.putenv('SDL_FBDEV', '/dev/fb0')  # Framebuffer device
+os.putenv('SDL_VIDEODRIVER', 'fbcon')  # Use framebuffer console
+os.putenv('SDL_NOMOUSE', '1')  # Disable mouse cursor
+
 
 # get size of screen
 screen = screeninfo.get_monitors()[0]
@@ -13,7 +20,7 @@ screen = screeninfo.get_monitors()[0]
 #Configuring picam2 stream
 
 picam2 = Picamera2()
-picam2.preview_configuration.main.size = (720,480)
+picam2.preview_configuration.main.size = (720,576)
 
 picam2.preview_configuration.main.format = "RGB888"
 picam2.preview_configuration.align()
@@ -47,7 +54,7 @@ def mapToVel(value2, min_value2, max_value2, min_resul2, max_result2):
     return velValue
 
 min_value2 = 0
-max_value2 = 480
+max_value2 = 576
 min_result2 = 127
 max_result2 = 0
 
@@ -58,7 +65,7 @@ midiChannel = 1
 #Add confidence values and extra settings to MediaPipe hand tracking. As we are using a live video stream this is not a static
 #image mode, confidence values in regards to overall detection and tracking and we will only let two hands be tracked at the same time
 #More hands can be tracked at the same time if desired but will slow down the system
-with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
+with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=1) as hands:
 
 #Create an infinite loop which will produce the live feed to our desktop and that will search for hands
      while True:
@@ -76,7 +83,7 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                 drawingModule.draw_landmarks(im, handLandmarks, handsModule.HAND_CONNECTIONS)
                 for point in handsModule.HandLandmark:
                     normalizedLandmark = handLandmarks.landmark[point]
-                    pixelCoordinatesLandmark= drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x, normalizedLandmark.y, 720, 480)
+                    pixelCoordinatesLandmark= drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x, normalizedLandmark.y, 720, 576)
                     if point == 8:
                         if pixelCoordinatesLandmark != None:
                             IndexTipX = pixelCoordinatesLandmark[0]
