@@ -13,14 +13,15 @@ Libraries
 If running headless while connected to a monitor:
 execute 
 ``export DISPLAY=:0``
-in terminal prior to running
+in terminal prior to running. Only works after booted to desktop GUI.
 
 Built using Picamera2 library rather OpenCV video streaming, as this was initially built using an Arducam
 
 ## Future iterations
 
+- add support for frame buffer (true headless, no x server)
 - make config.yml to support 
-- make different finger points configurable
+- make different finger/body points configurable
 - add CC support
 - add support for multi-hand
 - add various gesture support
