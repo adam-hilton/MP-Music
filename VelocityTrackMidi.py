@@ -39,10 +39,10 @@ drawingModule = mediapipe.solutions.drawing_utils
 handsModule = mediapipe.solutions.hands
 
 # define initial 'Previous' position
-PosPrev = None
+PosPrev = 0
 
 # define loop interval
-time_interval = .1
+time_interval = .05
 
 ccVal = 96
 
@@ -60,6 +60,7 @@ max_result = 127
 
 # Midi variables
 midiChannel = 1
+midiCC = 1
 
 
 #Add confidence values and extra settings to MediaPipe hand tracking. As we are using a live video stream this is not a static
@@ -69,62 +70,54 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
 
 #Create an infinite loop which will produce the live feed to our desktop and that will search for hands
      while True:
-           im = picam2.capture_array()
+            im = picam2.capture_array()
            #Unedit the below line if your live feed is produced upsidedown
-           im = cv2.flip(im, flipCode = 0)
+            im = cv2.flip(im, flipCode = 0)
            
            
            #produces the hand framework overlay ontop of the hand, you can choose the colour here too)
-           results = hands.process(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
+            results = hands.process(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
            
            #Incase the system sees multiple hands this if statment deals with that and produces another hand overlay
-           if results.multi_hand_landmarks != None:
+            if results.multi_hand_landmarks != None:
               for handLandmarks in results.multi_hand_landmarks:
                 drawingModule.draw_landmarks(im, handLandmarks, handsModule.HAND_CONNECTIONS)
                 for point in handsModule.HandLandmark:
                     normalizedLandmark = handLandmarks.landmark[point]
                     pixelCoordinatesLandmark= drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x, normalizedLandmark.y, 720, 576)
-                    if point == 8:
-                        if pixelCoordinatesLandmark != None:
-                            PosNew = pixelCoordinatesLandmark[0]
-                            if PosPrev is not None:
-                                vel = (PosNew - PosPrev)/time_interval
+                    if point == 8 and pixelCoordinatesLandmark != None:
+                        
+                        PosNew = pixelCoordinatesLandmark[0]
+                        
+                        vel = (PosNew - PosPrev)/time_interval
 
-                                if vel >= -1000 and vel <= 1000:
+                        ccVal = int(mapToCC(vel, min_value, max_value, min_result, max_result))
 
-                                    ccVal = int(mapToCC(vel, min_value, max_value, min_result, max_result))
+                        port.send(mido.Message('control_change', channel=midiChannel, control=midiCC, value=ccVal, time=1))
 
-                                    message = mido.Message('control_change', channel=4, control=1, value=ccVal, time=1)
+                        print(ccVal)
 
-                                    port.send(message)
-                            
-
-                                
-
-                                print(ccVal)
-
-                            PosPrev = PosNew
-
-                            time.sleep(time_interval)
-                        # else:
-                        #     port.send(mido.Message('control_change', channel=4, control=1, value=96, time=1))
-                        #     print(96)
+                        PosPrev = PosNew
+            # if results.multi_hand_landmarks is None:
+            #         # print('No hand in frame')
+            #         port.send(mido.Message('control_change', channel=4, control=1, value=96, time=1))
+            #         print(96)
                             
 
             
            #Below shows the current frame to the desktop 
         #    cv2.namedWindow("foo", cv2.WINDOW_NORMAL)
         #    cv2.setWindowProperty("foo", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-           window_name = "Frame"
-           cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-           cv2.moveWindow(window_name, screen.x - 1, screen.y - 1)
-           cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN,
+            window_name = "Frame"
+            cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+            cv2.moveWindow(window_name, screen.x - 1, screen.y - 1)
+            cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN,
                           cv2.WINDOW_FULLSCREEN)
-           cv2.imshow(window_name, im);
-           key = cv2.waitKey(1) & 0xFF
+            cv2.imshow(window_name, im);
+            key = cv2.waitKey(1) & 0xFF
         
            #Below states that if the |q| is press on the keyboard it will stop the system
-           if key == ord("q"):
+            if key == ord("q"):
               port.close()
               if port.closed:
                   print("port closed.")

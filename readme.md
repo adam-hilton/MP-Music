@@ -1,6 +1,6 @@
-# Midi Hand Tracker
+# Mediapipe Midi
 
-Midi Hand Tracker is a simple script that uses Mediapipe, OpenCV, and Mido to turn your hand movements into MIDI data.
+Mediapipe Midi is a series of simple script that use Mediapipe, OpenCV, and Mido to turn your movements into usable MIDI.
 
 ## Dependencies & Usage
 
@@ -10,18 +10,18 @@ Libraries
 - OpenCV
 - Mido
 
-If running headless while connected to a monitor:
+If running headless:
+connect pi to external monitor
+start x server
 execute 
 ``export DISPLAY=:0``
-in terminal prior to running. Only works after booted to desktop GUI.
 
-Built using Picamera2 library rather OpenCV video streaming, as this was initially built using an Arducam
+<!-- Built using Picamera2 library rather OpenCV video streaming, as this was initially built using an Arducam -->
 
-## Future iterations
+## Backlog
 
 - add support for frame buffer (true headless, no x server)
-- make config.yml to support 
-- make different finger/body points configurable
-- add CC support
-- add support for multi-hand
-- add various gesture support
+- make config.yml to support reusable elements
+- more gestures & pose detections
+- refactor for improved performance
+- outline for full pi setup in readme
