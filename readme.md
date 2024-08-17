@@ -4,17 +4,17 @@ Mediapipe Midi is a series of simple script that use Mediapipe, OpenCV, and Mido
 
 ## Dependencies & Usage
 
-Libraries
+### Libraries
 - Picamera2
 - Mediapipe
 - OpenCV
 - Mido
 
-If running headless:
-connect pi to external monitor
-start x server
-execute 
-``export DISPLAY=:0``
+
+### If running headless:
+- connect pi to external monitor
+- start x server
+- execute ``export DISPLAY=:0``
 
 <!-- Built using Picamera2 library rather OpenCV video streaming, as this was initially built using an Arducam -->
 
