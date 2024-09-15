@@ -7,6 +7,7 @@ from picamera2 import Picamera2
 import mido
 from libcamera import controls
 import screeninfo
+from pythonosc import udp_client
 
 # Set the environment for framebuffer
 os.putenv('SDL_FBDEV', '/dev/fb0')  # Framebuffer device
@@ -16,6 +17,9 @@ os.putenv('SDL_NOMOUSE', '1')  # Disable mouse cursor
 
 # get size of screen
 screen = screeninfo.get_monitors()[0]
+
+# setup the OSC client
+client = udp_client.SimpleUDPClient("127.0.0.1", 57120)
 
 #Configuring picam2 stream
 
@@ -39,33 +43,31 @@ handsModule = mediapipe.solutions.hands
 
 # function to scale ouput to readable midi values
 
-def mapToNote(value, min_value, max_value, min_result, max_result):
+def mapToNoteFloat(value, min_value, max_value, min_result, max_result):
  
- midiValue = min_result + (value - min_value)/(max_value - min_value)*(max_result - min_result)
+ midiValue = float(min_result) + (float(value) - float(min_value)) / (float(max_value) - float(min_value)) * (float(max_result) - float(min_result))
  return midiValue
 
 min_value = 0
 max_value = 720
-min_result = 50
-max_result = 80
+min_result = 0.0
+max_result = 1.0
 
-def mapToVel(value2, min_value2, max_value2, min_resul2, max_result2):
-    velValue = min_result2 + (value2 - min_value2)/(max_value2 - min_value2)*(max_result2 - min_result2)
+def mapToVelFloat(value2, min_value2, max_value2, min_resul2, max_result2):
+    velValue = float(min_result2) + (float(value2) - float(min_value2)) / (float(max_value2) - float(min_value2)) * (float(max_result2) - float(min_result2))
     return velValue
 
 min_value2 = 0
 max_value2 = 576
-min_result2 = 127
-max_result2 = 0
+min_result2 = 0.0
+max_result2 = 1.0
 
-# Midi variables
-midiChannel = 1
 
 
 #Add confidence values and extra settings to MediaPipe hand tracking. As we are using a live video stream this is not a static
 #image mode, confidence values in regards to overall detection and tracking and we will only let two hands be tracked at the same time
 #More hands can be tracked at the same time if desired but will slow down the system
-with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=1) as hands:
+with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=2) as hands:
 
 #Create an infinite loop which will produce the live feed to our desktop and that will search for hands
      while True:
@@ -87,16 +89,16 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                     if point == 8:
                         if pixelCoordinatesLandmark != None:
                             IndexTipX = pixelCoordinatesLandmark[0]
-                            noteVar = int(mapToNote(IndexTipX, min_value, max_value, min_result, max_result))
+                            noteVar = float(mapToNoteFloat(IndexTipX, min_value, max_value, min_result, max_result))
                             # print(noteVar)
                             IndexTipY = pixelCoordinatesLandmark[1]
-                            velVar = int(mapToVel(IndexTipY, min_value2, max_value2, min_result2, max_result2))
+                            velVar = float(mapToVelFloat(IndexTipY, min_value2, max_value2, min_result2, max_result2))
                             # print(velVar)
-                            noteOnMsg = mido.Message('note_on', channel=midiChannel, note=noteVar, velocity=velVar)
-                            noteOffMsg = mido.Message('note_off', channel=midiChannel, note=noteVar)
-                            port.send(noteOnMsg)
-                            port.send(noteOffMsg)
-            
+                            client.send_message("/control/trigSpeed", noteVar*10)
+                            client.send_message("/control/numNotes", noteVar*8)
+                            client.send_message("/control/brightness", noteVar)
+
+
 
             
            #Below shows the current frame to the desktop 
