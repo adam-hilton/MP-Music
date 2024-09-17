@@ -43,7 +43,7 @@ handsModule = mediapipe.solutions.hands
 
 # function to scale ouput to readable midi values
 
-def mapToNoteFloat(value, min_value, max_value, min_result, max_result):
+def mapToChordFloat(value, min_value, max_value, min_result, max_result):
  
  midiValue = float(min_result) + (float(value) - float(min_value)) / (float(max_value) - float(min_value)) * (float(max_result) - float(min_result))
  return midiValue
@@ -51,7 +51,7 @@ def mapToNoteFloat(value, min_value, max_value, min_result, max_result):
 min_value = 0
 max_value = 720
 min_result = 0.0
-max_result = 1.0
+max_result = 8.0
 
 def mapToVelFloat(value2, min_value2, max_value2, min_resul2, max_result2):
     velValue = float(min_result2) + (float(value2) - float(min_value2)) / (float(max_value2) - float(min_value2)) * (float(max_result2) - float(min_result2))
@@ -59,8 +59,8 @@ def mapToVelFloat(value2, min_value2, max_value2, min_resul2, max_result2):
 
 min_value2 = 0
 max_value2 = 576
-min_result2 = 0.0
-max_result2 = 1.0
+min_result2 = 1.0
+max_result2 = 0.0
 
 
 
@@ -89,14 +89,14 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                     if point == 8:
                         if pixelCoordinatesLandmark != None:
                             IndexTipX = pixelCoordinatesLandmark[0]
-                            noteVar = float(mapToNoteFloat(IndexTipX, min_value, max_value, min_result, max_result))
+                            chordVar = float(mapToChordFloat(IndexTipX, min_value, max_value, min_result, max_result))
                             # print(noteVar)
                             IndexTipY = pixelCoordinatesLandmark[1]
-                            velVar = float(mapToVelFloat(IndexTipY, min_value2, max_value2, min_result2, max_result2))
+                            brightVar = float(mapToVelFloat(IndexTipY, min_value2, max_value2, min_result2, max_result2))
                             # print(velVar)
-                            client.send_message("/control/trigSpeed", noteVar*10)
-                            client.send_message("/control/numNotes", noteVar*8)
-                            client.send_message("/control/brightness", noteVar)
+                            client.send_message("/control/trigSpeed", chordVar*10)
+                            client.send_message("/control/chord", chordVar*8)
+                            client.send_message("/control/brightness", brightVar)
 
 
 
