@@ -9,10 +9,10 @@ from libcamera import controls
 import screeninfo
 from pythonosc import udp_client
 
-# Set the environment for framebuffer
-os.putenv('SDL_FBDEV', '/dev/fb0')  # Framebuffer device
-os.putenv('SDL_VIDEODRIVER', 'fbcon')  # Use framebuffer console
-os.putenv('SDL_NOMOUSE', '1')  # Disable mouse cursor
+# # Set the environment for framebuffer -- not yet used
+# os.putenv('SDL_FBDEV', '/dev/fb0')  # Framebuffer device
+# os.putenv('SDL_VIDEODRIVER', 'fbcon')  # Use framebuffer console
+# os.putenv('SDL_NOMOUSE', '1')  # Disable mouse cursor
 
 
 # get size of screen
@@ -34,33 +34,30 @@ picam2.configure("preview")
 picam2.start()
 picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
 
-# set port to pisound DIN5
-port = mido.open_output('Midi Through:Midi Through Port-0 14:0')
-
 #Use MediaPipe to draw the hand framework over the top of hands it identifies in Real-Time
 drawingModule = mediapipe.solutions.drawing_utils
 handsModule = mediapipe.solutions.hands
 
 # function to scale ouput to readable midi values
 
-def mapToChordFloat(value, min_value, max_value, min_result, max_result):
+# def mapToChordFloat(value, min_value, max_value, min_result, max_result):
  
- midiValue = float(min_result) + (float(value) - float(min_value)) / (float(max_value) - float(min_value)) * (float(max_result) - float(min_result))
- return midiValue
+#  midiValue = float(min_result) + (float(value) - float(min_value)) / (float(max_value) - float(min_value)) * (float(max_result) - float(min_result))
+#  return midiValue
 
-min_value = 0
-max_value = 720
-min_result = 0.0
-max_result = 8.0
+# min_value = 0
+# max_value = 720
+# min_result = 0.0
+# max_result = 8.0
 
-def mapToVelFloat(value2, min_value2, max_value2, min_resul2, max_result2):
-    velValue = float(min_result2) + (float(value2) - float(min_value2)) / (float(max_value2) - float(min_value2)) * (float(max_result2) - float(min_result2))
-    return velValue
+# def mapToVelFloat(value2, min_value2, max_value2, min_resul2, max_result2):
+#     velValue = float(min_result2) + (float(value2) - float(min_value2)) / (float(max_value2) - float(min_value2)) * (float(max_result2) - float(min_result2))
+#     return velValue
 
-min_value2 = 0
-max_value2 = 576
-min_result2 = 1.0
-max_result2 = 0.0
+# min_value2 = 0
+# max_value2 = 576
+# min_result2 = 1.0
+# max_result2 = 0.0
 
 
 
@@ -80,30 +77,54 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
            results = hands.process(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
            
            #Incase the system sees multiple hands this if statment deals with that and produces another hand overlay
-           if results.multi_hand_landmarks != None:
+           if results.multi_hand_landmarks !=None:
               for handLandmarks in results.multi_hand_landmarks:
-                drawingModule.draw_landmarks(im, handLandmarks, handsModule.HAND_CONNECTIONS)
-                for point in handsModule.HandLandmark:
+                wrist_drawing_spec = drawingModule.DrawingSpec(color=(0, 0, 255), thickness=5, circle_radius=5)  # Red wrist
+                default_drawing_spec = drawingModule.DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=2)  # Green others
+                connection_drawing_spec = drawingModule.DrawingSpec(color=(255, 255, 255), thickness=1)
+                wrist = handLandmarks.landmark[handsModule.HandLandmark.THUMB_TIP]
+                index_finger_tip = handLandmarks.landmark[handsModule.HandLandmark.INDEX_FINGER_TIP]
+                image_height, image_width, _ = im.shape
+                wrist_px = mediapipe.solutions.drawing_utils._normalized_to_pixel_coordinates(wrist.x, wrist.y, image_width, image_height)
+                index_finger_tip_px = mediapipe.solutions.drawing_utils._normalized_to_pixel_coordinates(index_finger_tip.x, index_finger_tip.y, image_width, image_height)
+                
+                drawingModule.draw_landmarks(im
+                                             , handLandmarks
+                                             , handsModule.HAND_CONNECTIONS
+                                             , landmark_drawing_spec=default_drawing_spec
+                                             , connection_drawing_spec=connection_drawing_spec)
+                if wrist_px:
+                    cv2.circle(im, wrist_px, 5, (255, 0, 0), -1)
+                if index_finger_tip_px:
+                    cv2.circle(im, index_finger_tip_px, 5, (0, 0, 255), -1)
+              for point in handsModule.HandLandmark:
                     normalizedLandmark = handLandmarks.landmark[point]
-                    pixelCoordinatesLandmark= drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x, normalizedLandmark.y, 720, 576)
+                    pixelCoordinatesLandmark = drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x, normalizedLandmark.y, 1000, 1000)
                     if point == 8:
                         if pixelCoordinatesLandmark != None:
+                            # assign Index axes to variables
                             IndexTipX = pixelCoordinatesLandmark[0]
-                            chordVar = float(mapToChordFloat(IndexTipX, min_value, max_value, min_result, max_result))
-                            # print(noteVar)
+                            # print('Index X is: ' + str(IndexTipX))
                             IndexTipY = pixelCoordinatesLandmark[1]
-                            brightVar = float(mapToVelFloat(IndexTipY, min_value2, max_value2, min_result2, max_result2))
-                            # print(velVar)
-                            client.send_message("/control/trigSpeed", chordVar*10)
-                            client.send_message("/control/chord", chordVar*8)
-                            client.send_message("/control/brightness", brightVar)
-
+                            # print('Index Z is: ' + str())
+                            # send Index variables to various OSC messages
+                            client.send_message("/control/verb", IndexTipY)
+                            client.send_message("/control/bright", IndexTipY)
+                            client.send_message("/control/trigRate", IndexTipY)
+                            client.send_message("/control/damp", IndexTipX)
+                            
+                    if point == 4:
+                        if pixelCoordinatesLandmark != None:
+                            # assign Thumb axes to variables
+                            ThumbTipX = pixelCoordinatesLandmark[0]
+                            ThumbTipY = pixelCoordinatesLandmark[1]
+                            # send Thumb variables to OSC
+                            client.send_message("/control/chord", ThumbTipX)
+                            client.send_message("/control/inversion", ThumbTipY)
 
 
             
            #Below shows the current frame to the desktop 
-        #    cv2.namedWindow("foo", cv2.WINDOW_NORMAL)
-        #    cv2.setWindowProperty("foo", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
            window_name = "Frame"
            cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
            cv2.moveWindow(window_name, screen.x - 1, screen.y - 1)
