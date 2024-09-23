@@ -110,7 +110,6 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                             # send Index variables to various OSC messages
                             client.send_message("/control/verb", IndexTipY)
                             client.send_message("/control/bright", IndexTipY)
-                            client.send_message("/control/trigRate", IndexTipY)
                             client.send_message("/control/damp", IndexTipX)
                             
                     if point == 4:
@@ -121,6 +120,7 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                             # send Thumb variables to OSC
                             client.send_message("/control/chord", ThumbTipX)
                             client.send_message("/control/inversion", ThumbTipY)
+                            client.send_message("/control/trigRate", ThumbTipY)
 
 
             

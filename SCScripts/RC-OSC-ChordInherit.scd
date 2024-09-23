@@ -43,16 +43,16 @@ SynthDef(\testRingsArp, {
         struct: 0.0,
         bright: bright,
         damp: damp,
-        pos: 0.1,
+        pos: 0.05,
         model: 2
     );
 
     cloudsSound = MiClouds.ar(
 			ringsSound * 0.8,    // Signal input (MiRings output)
 			// freeze: 0,             // Freeze off by default -- add in a freeze option for hand pose?
-			pos: 0.1,           // Fixed grain position -- add in 2nd hand control?
-			size: 0.5,           // Fixed grain size -- add in 2nd hand control?
-			dens: 1.0,           // Fixed grain density
+			pos: 0.5,           // Fixed grain position -- add in 2nd hand control?
+			size: 0.3,           // Fixed grain size -- add in 2nd hand control?
+			dens: 7.0,           // Fixed grain density
 			spread: 0.9,
 			rvb: verb,
 			drywet: 0.1,            // Fixed dry/wet mix -- add in 2nd hand control?
