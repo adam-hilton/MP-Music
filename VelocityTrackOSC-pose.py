@@ -79,7 +79,22 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_
             results = pose.process(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
            
             if results.pose_landmarks:
-              drawingModule.draw_landmarks(im, results.pose_landmarks, poseModule.POSE_CONNECTIONS)
+
+              left_drawing_spec = drawingModule.DrawingSpec(color=(0, 0, 255), thickness=5, circle_radius=5)  # Red left
+              default_drawing_spec = drawingModule.DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=2)  # Green others
+              connection_drawing_spec = drawingModule.DrawingSpec(color=(255, 255, 255), thickness=1)
+              image_height, image_width, _ = im.shape
+              right_index = results.pose_landmarks.landmark[poseModule.PoseLandmark.RIGHT_INDEX]
+              left_index = results.pose_landmarks.landmark[poseModule.PoseLandmark.LEFT_INDEX]
+              right_index_px = mediapipe.solutions.drawing_utils._normalized_to_pixel_coordinates(right_index.x, right_index.y, image_width, image_height)
+              left_index_px = mediapipe.solutions.drawing_utils._normalized_to_pixel_coordinates(left_index.x, left_index.y, image_width, image_height)
+
+              drawingModule.draw_landmarks(im, 
+                                           results.pose_landmarks, 
+                                           poseModule.POSE_CONNECTIONS,
+                                           landmark_drawing_spec=default_drawing_spec,
+                                           connection_drawing_spec=connection_drawing_spec
+                                           )
   
               right_index = results.pose_landmarks.landmark[poseModule.PoseLandmark.RIGHT_INDEX]
               left_index = results.pose_landmarks.landmark[poseModule.PoseLandmark.LEFT_INDEX]
@@ -87,6 +102,10 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_
               x_right_index = int(right_index.x * 720)
               x_left_index = int(left_index.x * 720)
 
+              if right_index_px:
+                    cv2.circle(im, right_index_px, 5, (255, 255, 255), -1)
+              if left_index_px:
+                    cv2.circle(im, left_index_px, 20, (0, 0, 255), -1)
               
               # print(f"Left index x-coordinate: {x_left_index}")
 
@@ -101,8 +120,6 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_
                 vel = (PosNew - PosPrev)/time_interval
 
                 OSCVal = mapToVel(vel, min_value, max_value, min_result, max_result)
-
-                # port.send(mido.Message('control_change', channel=midiChannel, control=midiCC, value=ccVal, time=1))
 
                 print(OSCVal)
                 print(f"Right index x-coordinate: {x_left_index}")
