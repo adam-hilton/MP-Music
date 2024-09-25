@@ -1,7 +1,7 @@
 (
 s.waitForBoot {
     // Load the buffer
-    b = Buffer.read(s, "BrownBreak.wav"); // remember to free the buffer later.
+    b = Buffer.read(s, "/home/patch/Repos/Mediapipe-Midi/SCScripts/BrownBreak.wav"); // remember to free the buffer later.
 
     // Define the SynthDef after the server is booted
     SynthDef(\help_PlayBuf, { |out = 0, bufnum = 0, rate = 1|
