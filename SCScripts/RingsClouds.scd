@@ -2,6 +2,8 @@
 
 s.waitForBoot {
 
+//// Delcare initial vars
+
 var chordIndex = 0;
 
 var chords = [
@@ -20,6 +22,9 @@ var invertChord = { |chord, inversion|
     };
     newChord;  // Return the inverted chord
 };
+
+//// Rings/Clouds SynthDef
+
 
 SynthDef(\testRingsArp, {
     arg freq = 60, bright = 0.01, chord = #[60, 62, 63, 64], trigRate = 0.75, verb = 0.5, damp = 0.7;
@@ -64,17 +69,22 @@ SynthDef(\testRingsArp, {
     Out.ar(0, Limiter.ar(Pan2.ar(cloudsSound, 0) * 3), 0.8);
 }).add;
 
+
+//// Wait for Server and instantiate synth
+
 s.sync;
 
 ~synth = Synth(\testRingsArp, [\chord, currentChord, \verb, 0.1, \bright, 0.1, \damp, 0.7, \drywet, 0.1]);
-// "synth initialized".postln;
+
+
+//// OSC Defs
+
 
 // OSC control for changing the currently selected chord
 OSCdef(\chordSet, { |msg|
     chordIndex = msg[1].linlin(0, 1000, 0, 4).asInteger;  // Clip to avoid out-of-range errors
     currentChord = chords[chordIndex];
     // ~synth.set(\chord, chordValue);  // Set 'chord' control value
-    // ("Chord index set to: " + chordIndex).postln; // log
 }, '/control/chord');
 
 // OSC control for setting inversion and sending chord
@@ -83,10 +93,7 @@ OSCdef(\chordInvert, { |msg|
     var invertNum = msg[1].linlin(0, 1000, 3, 0).asInteger;
     var chordInversion = invertChord.(currentChord, invertNum);
     ~synth.set(\chord, chordInversion);  // Set 'chord' control value
-    // ("Current chord set to: " + chordInversion).postln; // log
 }, '/control/inversion');
-
-// OSC def t
 
 // OSC control for changing reverb mix
 
@@ -122,8 +129,6 @@ OSCdef(\dampControl, { |msg|
     var dampValue = msg[1].linlin(0, 1000, 0.1, 0.9);
     ~synth.set(\damp, dampValue);
 }, '/control/damp');
-
-// OSC control for changing 
 
 }
 )

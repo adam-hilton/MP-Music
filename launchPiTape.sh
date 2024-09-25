@@ -4,7 +4,7 @@
 source ~/environments/MediaCV/bin/activate
 
 # Run the SuperCollider script
-sclang ~/Repos/Mediapipe-Midi/SCScripts/TapeStopOSC.scd &
+sclang ~/Repos/Mediapipe-Midi/SCScripts/TapeStop.scd &
 
 # Run the Python script
-python ~/Repos/Mediapipe-Midi/VelocityTrackOSC-pose.py
+python ~/Repos/Mediapipe-Midi/VelocityOSC-pose.py

@@ -4,7 +4,7 @@
 source ~/environments/MediaCV/bin/activate
 
 # Run the SuperCollider script
-sclang ~/Repos/Mediapipe-Midi/SCScripts/RC-OSC-ChordInherit.scd &
+sclang ~/Repos/Mediapipe-Midi/SCScripts/RingsClouds.scd &
 
 # Run the Python script
-python ~/Repos/Mediapipe-Midi/HandTrackOSC-pose.py
+python ~/Repos/Mediapipe-Midi/XY-OSC-pose.py

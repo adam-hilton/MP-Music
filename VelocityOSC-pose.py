@@ -10,7 +10,7 @@ import screeninfo
 from pythonosc import udp_client
 import time
 
-# # Set the environment for framebuffer -- to access later for headless mode
+# # Set the environment for framebuffer -- TBC for headless mode
 # os.putenv('SDL_FBDEV', '/dev/fb0')  # Framebuffer device
 # os.putenv('SDL_VIDEODRIVER', 'fbcon')  # Use framebuffer console
 # os.putenv('SDL_NOMOUSE', '1')  # Disable mouse cursor
@@ -35,8 +35,6 @@ picam2.configure("preview")
 picam2.start()
 picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
 
-# set port to pisound DIN5
-# port = mido.open_output('pisound MIDI PS-1MJPEPE')
 
 #Use MediaPipe to draw the hand framework over the top of hands it identifies in Real-Time
 drawingModule = mediapipe.solutions.drawing_utils
@@ -63,9 +61,9 @@ min_result = -2
 max_result = 2
 
 
-#Add confidence values and extra settings to MediaPipe hand tracking. As we are using a live video stream this is not a static
-#image mode, confidence values in regards to overall detection and tracking and we will only let two hands be tracked at the same time
-#More hands can be tracked at the same time if desired but will slow down the system
+#Add confidence values and extra settings to MediaPipe pose tracking. As we are using a live video stream this is not a static
+#image mode, confidence values in regards to overall detection and tracking
+
 with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7) as pose:
 
 #Create an infinite loop which will produce the live feed to our desktop and that will search for hands
@@ -107,13 +105,7 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_
               if left_index_px:
                     cv2.circle(im, left_index_px, 20, (0, 0, 255), -1)
               
-              # print(f"Left index x-coordinate: {x_left_index}")
-
-              # for poseLandmarks in results.pose_landmarks.landmark:
-                # for point in poseModule.PoseLandmark:
-                    # normalizedLandmark = poseLandmarks[0][0]
-                    # pixelCoordinatesLandmark= drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x, normalizedLandmark.y, 720, 576)
-                    # if point == 8 and pixelCoordinatesLandmark != None:
+              # Only send OSC Values if the controlling finger is in view
               if 0 <= left_index.x <=1 and 0<= left_index.y <= 1:
                 PosNew = x_left_index
                 
@@ -121,20 +113,16 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_
 
                 OSCVal = mapToVel(vel, min_value, max_value, min_result, max_result)
 
-                print(OSCVal)
-                print(f"Right index x-coordinate: {x_left_index}")
                 client.send_message("/control/freq", OSCVal)
 
                 PosPrev = PosNew
-                # if results.multi_hand_landmarks is None:
-                #         # print('No hand in frame')
+
               else: client.send_message("/control/freq", 1)
                             
 
             
            #Below shows the current frame to the desktop 
-        #    cv2.namedWindow("foo", cv2.WINDOW_NORMAL)
-        #    cv2.setWindowProperty("foo", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
             window_name = "Frame"
             cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
             cv2.moveWindow(window_name, screen.x - 1, screen.y - 1)
@@ -145,7 +133,4 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_
         
            #Below states that if the |q| is press on the keyboard it will stop the system
             if key == ord("q"):
-            #   port.close()
-            #   if port.closed:
-            #       print("port closed.")
               break

@@ -75,11 +75,15 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_
               x_left_index = int(left_index.x * 1000)
               y_left_index = int(left_index.y * 1000)
 
-                
+                # Change the appearance of L/R Fingertips
+
               if right_index_px:
                     cv2.circle(im, right_index_px, 20, (255, 0, 0), -1)
               if left_index_px:
                     cv2.circle(im, left_index_px, 20, (0, 0, 255), -1)
+
+
+                  # All the OSC messages
 
               client.send_message("/control/verb", y_left_index)
               client.send_message("/control/bright", y_left_index)
