@@ -43,8 +43,9 @@ SynthDef(\testRingsArp, {
         struct: 0.0,
         bright: bright,
         damp: damp,
-        pos: 0.05,
-        model: 2
+        pos: 0.4,
+        model: 2,
+        poly: 4
     );
 
     cloudsSound = MiClouds.ar(
@@ -54,34 +55,35 @@ SynthDef(\testRingsArp, {
 			size: 0.3,           // Fixed grain size -- add in 2nd hand control?
 			dens: 7.0,           // Fixed grain density
 			spread: 0.9,
+            tex: 0.8,
 			rvb: verb,
-			drywet: 0.1,            // Fixed dry/wet mix -- add in 2nd hand control?
+			drywet: verb            // Fixed dry/wet mix -- add in 2nd hand control?
 		);
 
     // Output the sound
-    Out.ar(0, Pan2.ar(cloudsSound, 0));
+    Out.ar(0, Limiter.ar(Pan2.ar(cloudsSound, 0) * 3), 0.8);
 }).add;
 
 s.sync;
 
-~synth = Synth(\testRingsArp, [\chord, currentChord, \verb, 0.1, \bright, 0.1, \damp, 0.7]);
-"synth initialized".postln;
+~synth = Synth(\testRingsArp, [\chord, currentChord, \verb, 0.1, \bright, 0.1, \damp, 0.7, \drywet, 0.1]);
+// "synth initialized".postln;
 
 // OSC control for changing the currently selected chord
 OSCdef(\chordSet, { |msg|
     chordIndex = msg[1].linlin(0, 1000, 0, 4).asInteger;  // Clip to avoid out-of-range errors
     currentChord = chords[chordIndex];
     // ~synth.set(\chord, chordValue);  // Set 'chord' control value
-    ("Chord index set to: " + chordIndex).postln; // log
+    // ("Chord index set to: " + chordIndex).postln; // log
 }, '/control/chord');
 
 // OSC control for setting inversion and sending chord
 
 OSCdef(\chordInvert, { |msg|
-    var invertNum = msg[1].linlin(0, 1000, 3, 0).floor.asInteger;
+    var invertNum = msg[1].linlin(0, 1000, 3, 0).asInteger;
     var chordInversion = invertChord.(currentChord, invertNum);
     ~synth.set(\chord, chordInversion);  // Set 'chord' control value
-    ("Current chord set to: " + chordInversion).postln; // log
+    // ("Current chord set to: " + chordInversion).postln; // log
 }, '/control/inversion');
 
 // OSC def t
@@ -89,28 +91,35 @@ OSCdef(\chordInvert, { |msg|
 // OSC control for changing reverb mix
 
 OSCdef(\verbControl, { |msg|
-    var verbValue = msg[1].linlin(0, 1000, 0.99, 0.01);
+    var verbValue = msg[1].linlin(0, 1000, 0.8, 0.01);
     ~synth.set(\verb, verbValue);  // Set 'chord' control value
+}, '/control/verb');
+
+// OSC control for dry/wet, incoming from the verb OSC message
+
+OSCdef(\wetControl, { |msg|
+    var wetValue = msg[1].linlin(0, 1000, 0.7, 0.05);
+    ~synth.set(\drywet, wetValue);  // Set 'chord' control value
 }, '/control/verb');
 
 // OSC control for changing brightness
 
 OSCdef(\brightControl, { |msg|
-    var brightValue = msg[1].linexp(0, 1000, 0.8, 0.01);
+    var brightValue = msg[1].linexp(0, 1000, 0.7, 0.01);
     ~synth.set(\bright, brightValue);  // Set 'chord' control value
 }, '/control/bright');
 
 // OSC control for changing arp speed
 
 OSCdef(\trigRateControl, { |msg|
-    var newRate = msg[1].linexp(0, 1000, 8, 1);
+    var newRate = msg[1].linexp(0, 1000, 8, 0.5);
     ~synth.set(\trigRate, newRate);
 }, '/control/trigRate');
 
 // OSC control for changing damping
 
 OSCdef(\dampControl, { |msg|
-    var dampValue = msg[1].linlin(0, 1000, 0.05, 0.99);
+    var dampValue = msg[1].linlin(0, 1000, 0.1, 0.9);
     ~synth.set(\damp, dampValue);
 }, '/control/damp');
 

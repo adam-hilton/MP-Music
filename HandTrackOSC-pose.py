@@ -70,10 +70,10 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_
               
               
 
-              x_right_index = int(right_index.x * 720)
-              y_right_index = int(right_index.y * 540)
-              x_left_index = int(left_index.x * 720)
-              y_left_index = int(left_index.y * 540)
+              x_right_index = int(right_index.x * 1000)
+              y_right_index = int(right_index.y * 1000)
+              x_left_index = int(left_index.x * 1000)
+              y_left_index = int(left_index.y * 1000)
 
                 
               if right_index_px:
