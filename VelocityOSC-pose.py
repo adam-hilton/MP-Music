@@ -1,10 +1,8 @@
 #Import the necessary Packages for this software to run
-# from sklearn import preprocessing
 import mediapipe
 import os
 import cv2
 from picamera2 import Picamera2
-# import mido
 from libcamera import controls
 import screeninfo
 from pythonosc import udp_client
@@ -25,7 +23,7 @@ client = udp_client.SimpleUDPClient("127.0.0.1", 57120)
 #Configuring picam2 stream
 
 picam2 = Picamera2()
-picam2.preview_configuration.main.size = (720,576)
+picam2.preview_configuration.main.size = (1080,608)
 
 picam2.preview_configuration.main.format = "RGB888"
 picam2.preview_configuration.align()
@@ -64,7 +62,7 @@ max_result = 2
 #Add confidence values and extra settings to MediaPipe pose tracking. As we are using a live video stream this is not a static
 #image mode, confidence values in regards to overall detection and tracking
 
-with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7) as pose:
+with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.8, min_tracking_confidence=0.8) as pose:
 
 #Create an infinite loop which will produce the live feed to our desktop and that will search for hands
      while True:
@@ -125,10 +123,15 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_
 
             window_name = "Frame"
             cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-            cv2.moveWindow(window_name, screen.x - 1, screen.y - 1)
-            cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN,
-                          cv2.WINDOW_FULLSCREEN)
-            cv2.imshow(window_name, im);
+            
+            # uncomment below if the size of the screen matches the dimenions declared above
+            # cv2.moveWindow(window_name, screen.x - 200, screen.y - 200)
+            cv2.setWindowProperty(window_name
+                                  , cv2.WND_PROP_FULLSCREEN
+                                  , cv2.WINDOW_FULLSCREEN
+                                  )
+            im_resized = cv2.resize(im, (1920, 1080), interpolation=cv2.INTER_LINEAR)
+            cv2.imshow(window_name, im_resized);
             key = cv2.waitKey(1) & 0xFF
         
            #Below states that if the |q| is press on the keyboard it will stop the system
