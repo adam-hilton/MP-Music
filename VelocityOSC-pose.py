@@ -7,6 +7,7 @@ from libcamera import controls
 import screeninfo
 from pythonosc import udp_client
 import time
+import pyautogui
 
 # # Set the environment for framebuffer -- TBC for headless mode
 # os.putenv('SDL_FBDEV', '/dev/fb0')  # Framebuffer device
@@ -121,6 +122,7 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.8, min_
             
            #Below shows the current frame to the desktop 
 
+            screen_width, screen_height = pyautogui.size()
             window_name = "Frame"
             cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
             
@@ -130,7 +132,7 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.8, min_
                                   , cv2.WND_PROP_FULLSCREEN
                                   , cv2.WINDOW_FULLSCREEN
                                   )
-            im_resized = cv2.resize(im, (1920, 1080), interpolation=cv2.INTER_LINEAR)
+            im_resized = cv2.resize(im, (screen_width, screen_height), interpolation=cv2.INTER_LINEAR)
             cv2.imshow(window_name, im_resized);
             key = cv2.waitKey(1) & 0xFF
         
