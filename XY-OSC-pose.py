@@ -37,7 +37,7 @@ poseModule = mediapipe.solutions.pose
 #Add confidence values and extra settings to MediaPipe hand tracking. As we are using a live video stream this is not a static
 #image mode, confidence values in regards to overall detection and tracking and we will only let two hands be tracked at the same time
 #More hands can be tracked at the same time if desired but will slow down the system
-with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7) as pose:
+with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.9, min_tracking_confidence=0.5) as pose:
 
 #Create an infinite loop which will produce the live feed to our desktop and that will search for hands
      while True:
@@ -93,12 +93,11 @@ with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.7, min_
 
                   # All the OSC messages
 
-              client.send_message("/control/verb", y_left_index)
-              client.send_message("/control/bright", y_left_index)
-              client.send_message("/control/damp", x_left_index)
-              client.send_message("/control/chord", x_right_index)
-              client.send_message("/control/inversion", y_right_index)
-              client.send_message("/control/trigRate", y_right_index)
+              client.send_message("/control/XLeftIndex", x_left_index)
+              client.send_message("/control/YLeftIndex", y_left_index)
+              
+              client.send_message("/control/XRightIndex", x_right_index)
+              client.send_message("/control/YRightIndex", y_right_index)
                             
             
            #Below shows the current frame to the desktop 

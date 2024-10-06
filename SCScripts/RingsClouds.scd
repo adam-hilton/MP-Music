@@ -27,7 +27,7 @@ var invertChord = { |chord, inversion|
 
 
 SynthDef(\testRingsArp, {
-    arg freq = 60, bright = 0.01, chord = #[60, 62, 63, 64], trigRate = 0.75, verb = 0.5, damp = 0.7;
+    arg freq = 60, bright = 0.01, chord = #[60, 62, 63, 64], trigRate = 0.75, verb = 0.5, drywet = 0.1, damp = 0.7, dens = 0.4;
     
     // Chord selection logic should be based on control values, not UGens
     var trig, ringsSound, cloudsSound, freqIndex;
@@ -44,7 +44,7 @@ SynthDef(\testRingsArp, {
     // Generate sound using MiRings
     ringsSound = MiRings.ar(
         trig: trig,
-        pit: freq,  // Pass arpeggiated note
+        pit: freq,
         struct: 0.0,
         bright: bright,
         damp: damp,
@@ -55,14 +55,13 @@ SynthDef(\testRingsArp, {
 
     cloudsSound = MiClouds.ar(
 			ringsSound * 0.8,    // Signal input (MiRings output)
-			// freeze: 0,             // Freeze off by default -- add in a freeze option for hand pose?
-			pos: 0.5,           // Fixed grain position -- add in 2nd hand control?
-			size: 0.3,           // Fixed grain size -- add in 2nd hand control?
-			dens: 7.0,           // Fixed grain density
-			spread: 0.9,
+			pos: 0.3,
+			size: 0.2,
+			dens: dens,
+			spread: 1,
             tex: 0.8,
 			rvb: verb,
-			drywet: verb            // Fixed dry/wet mix -- add in 2nd hand control?
+			drywet: drywet
 		);
 
     // Output the sound
@@ -79,56 +78,68 @@ s.sync;
 
 //// OSC Defs
 
+/// Music Hand
 
 // OSC control for changing the currently selected chord
 OSCdef(\chordSet, { |msg|
     chordIndex = msg[1].linlin(0, 1000, 0, 4).asInteger;  // Clip to avoid out-of-range errors
     currentChord = chords[chordIndex];
-    // ~synth.set(\chord, chordValue);  // Set 'chord' control value
-}, '/control/chord');
+}, '/control/XRightIndex');
 
 // OSC control for setting inversion and sending chord
 
 OSCdef(\chordInvert, { |msg|
     var invertNum = msg[1].linlin(0, 1000, 3, 0).asInteger;
     var chordInversion = invertChord.(currentChord, invertNum);
-    ~synth.set(\chord, chordInversion);  // Set 'chord' control value
-}, '/control/inversion');
-
-// OSC control for changing reverb mix
-
-OSCdef(\verbControl, { |msg|
-    var verbValue = msg[1].linlin(0, 1000, 0.8, 0.01);
-    ~synth.set(\verb, verbValue);  // Set 'chord' control value
-}, '/control/verb');
-
-// OSC control for dry/wet, incoming from the verb OSC message
-
-OSCdef(\wetControl, { |msg|
-    var wetValue = msg[1].linlin(0, 1000, 0.7, 0.05);
-    ~synth.set(\drywet, wetValue);  // Set 'chord' control value
-}, '/control/verb');
-
-// OSC control for changing brightness
-
-OSCdef(\brightControl, { |msg|
-    var brightValue = msg[1].linexp(0, 1000, 0.7, 0.01);
-    ~synth.set(\bright, brightValue);  // Set 'chord' control value
-}, '/control/bright');
+    ~synth.set(\chord, chordInversion);  
+}, '/control/YRightIndex');
 
 // OSC control for changing arp speed
 
 OSCdef(\trigRateControl, { |msg|
     var newRate = msg[1].linexp(0, 1000, 8, 0.5);
     ~synth.set(\trigRate, newRate);
-}, '/control/trigRate');
+}, '/control/YRightIndex');
+
+
+/// Timbre Hand
+
+
+// OSC control for changing reverb mix
+
+OSCdef(\verbControl, { |msg|
+    var verbValue = msg[1].linlin(0, 100, 0.9, 0.01);
+    ~synth.set(\verb, verbValue);
+}, '/control/YLeftIndex');
+
+// OSC control for dry/wet
+
+OSCdef(\wetControl, { |msg|
+    var wetValue = msg[1].linlin(0, 1000, 0.7, 0.05);
+    ~synth.set(\drywet, wetValue);
+}, '/control/YLeftIndex');
+
+// OSC control for changing brightness
+
+OSCdef(\brightControl, { |msg|
+    var brightValue = msg[1].linexp(0, 1000, 0.7, 0.01);
+    ~synth.set(\bright, brightValue);
+}, '/control/YLeftIndex');
+
 
 // OSC control for changing damping
 
 OSCdef(\dampControl, { |msg|
-    var dampValue = msg[1].linlin(0, 1000, 0.1, 0.9);
+    var dampValue = msg[1].linlin(0, 1000, 0.1, 0.85);
     ~synth.set(\damp, dampValue);
-}, '/control/damp');
+}, '/control/XLeftIndex');
+
+// OSC control for changing density
+
+OSCdef(\densControl, { |msg|
+    var densValue = msg[1].linlin(0, 1000, 0.4, 0.8);
+    ~synth.set(\dens, densValue);
+}, '/control/YLeftIndex');
 
 }
 )

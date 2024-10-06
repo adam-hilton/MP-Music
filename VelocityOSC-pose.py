@@ -63,7 +63,7 @@ max_result = 2
 #Add confidence values and extra settings to MediaPipe pose tracking. As we are using a live video stream this is not a static
 #image mode, confidence values in regards to overall detection and tracking
 
-with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.8, min_tracking_confidence=0.8) as pose:
+with poseModule.Pose(static_image_mode=False, min_detection_confidence=0.9, min_tracking_confidence=0.5) as pose:
 
 #Create an infinite loop which will produce the live feed to our desktop and that will search for hands
      while True:
