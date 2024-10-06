@@ -25,6 +25,16 @@ var invertChord = { |chord, inversion|
 
 //// Rings/Clouds SynthDef
 
+b = Buffer.read(s, "/home/patch/Repos/Mediapipe-Midi/SCScripts/TCA-RingsSoundBed.mp3");
+
+// Define buffer playback synth
+
+SynthDef(\help_PlayBuf, { |out = 0, bufnum = 0, rate = 1|
+        var sound = PlayBuf.ar(2, bufnum, (BufRateScale.kr(bufnum)), loop: 1.0, doneAction: 0);
+        Out.ar(out, sound * 0.5);
+    }).add;
+
+// Define RingsClouds synth
 
 SynthDef(\testRingsArp, {
     arg freq = 60, bright = 0.01, chord = #[60, 62, 63, 64], trigRate = 0.75, verb = 0.5, drywet = 0.1, damp = 0.7, dens = 0.4;
@@ -72,6 +82,8 @@ SynthDef(\testRingsArp, {
 //// Wait for Server and instantiate synth
 
 s.sync;
+
+~buff = Synth(\help_PlayBuf);
 
 ~synth = Synth(\testRingsArp, [\chord, currentChord, \verb, 0.1, \bright, 0.1, \damp, 0.7, \drywet, 0.1]);
 
