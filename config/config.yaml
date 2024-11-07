@@ -1,0 +1,7 @@
+mediapipe_module: "pose"
+osc:
+  ip: "127.0.0.1"
+  port: 57120
+environment:
+  debug: true
+  log_level: "INFO"

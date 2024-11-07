@@ -1,0 +1,16 @@
+make list of all variables to abstract that are outside of all module class calls 
+    e.g. a call to results = hands.process(...) or handsModule.HandLandmark
+
+    - screen resolution
+    - dot colors
+    - dot widths
+    - line colors
+    - line widths
+    - midi device
+    - midi port
+    - midi channel
+    - preview size
+    - OSC addresses?
+
+high-level launcher script that imports/executes scripts based on midi vs osc, hands vs pose etc, 
+    plugging those functions into each other
