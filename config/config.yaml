@@ -1,7 +1,33 @@
-mediapipe_module: "pose"
+mediapipe_module:
+  pose: true
+  hands: false
 osc:
+  out: true
   ip: "127.0.0.1"
   port: 57120
+  address_1:
+  address_2:
+  address_3:
+  address_4:
+  address_5:
 environment:
   debug: true
   log_level: "INFO"
+preview_size:
+  width: 1080
+  height: 608
+midi:
+  out: false
+  port: "Midi Through:Midi Through Port-0 14:0"
+  channel: 1
+  cc: 22
+  
+  min_in_1: 0
+  min_out_1: 30
+  max_in_1: 1000
+  max_out_1: 80
+  
+  min_in_2: 0
+  min_out_2: 0
+  max_in_2: 1000
+  max_out_2: 120
