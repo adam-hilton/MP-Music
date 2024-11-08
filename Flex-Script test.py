@@ -1,36 +1,15 @@
 #Import the necessary Packages for this software to run
-import os
-import yaml
-import importlib
-import mediapipe
-import cv2
+import os, yaml, mediapipe, cv2, screeninfo
+# import pyautogui
 from picamera2 import Picamera2
 from libcamera import controls
-import screeninfo
 from pythonosc import udp_client
-# import pyautogui
+from utils.config_loader import load_config
+from utils.min_max_scaler import scale_value
 
-# load the config dictionary
-def load_config(file_path="config/config.yaml"):
-    with open(file_path, "r") as file:
-        config = yaml.safe_load(file)
-    return config
-
-# # get size of screen from environment resolution
-# screen = screeninfo.get_monitors()[0]
 
 def send_midi():
     print("Midi data sent")
-
-def midi_note_scale(value):
-
-    min_value = 0
-    max_value = 720
-    min_result = 50
-    max_result = 80
-
-    midiValue = min_result + (value - min_value)/(max_value - min_value)*(max_result - min_result)
-    return midiValue
 
 def midi_cc_scale(value2):
     min_value2 = 0
@@ -53,8 +32,15 @@ def send_osc(client):
 def main():
     config = load_config()
     # setup the OSC client
-    client = udp_client.SimpleUDPClient(config['osc']['ip'], config['osc']['port'])
+    client = udp_client.SimpleUDPClient(config['osc']['ip'], 
+                                        config['osc']['port'])
     print("Main function ran")
+    scaled = scale_value(500, 
+                         config['midi']['min_in_1'], 
+                         config['midi']['max_in_1'], 
+                         config['midi']['min_out_1'], 
+                         config['midi']['max_out_1'])
+    print(scaled)
     if config['mediapipe_module'].get('pose', False):
         print("Pose module present")
         if config["midi"].get("out"):

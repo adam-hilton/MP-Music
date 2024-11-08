@@ -1,20 +1,21 @@
 make list of all variables to abstract that are outside of all module class calls 
     e.g. a call to results = hands.process(...) or handsModule.HandLandmark
 
-    - dot colors
-    - dot widths
+    - dot colors [x]
+    - dot widths 
     - line colors
     - line widths
-    - midi device
-    - midi port
-    - midi channel
-    - midi scale min / max (number them? how to have multiples?)
-    - preview size
-    - OSC addresses?
-    - midi out y/n
-    - osc out y/n
+    - midi device/port [x]
+    - midi channel [x]
+    - midi scale min / max (number them? how to have multiples?) [x]
+    - preview size [x]
+    - OSC addresses?[x]
+    - midi out y/n [x]
+    - osc out y/n [x]
     
 
 high-level launcher script that imports/executes scripts based on midi vs osc, hands vs pose etc, 
     plugging those functions into each other
     --- let's just do if/elif for the config
+
+create utils for sending midi out & osc out, so both are available within one script
