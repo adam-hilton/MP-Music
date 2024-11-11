@@ -1,6 +1,6 @@
 # Mediapipe Midi
 
-Mediapipe Midi is a series of simple script that use Mediapipe, OpenCV, and Mido to turn your movements into usable MIDI.
+Mediapipe Midi is a series of simple scripts that use Mediapipe, OpenCV, Mido, and OSC to turn your movements into usable data that can be used for 
 
 ## Dependencies & Usage
 
@@ -11,7 +11,7 @@ Mediapipe Midi is a series of simple script that use Mediapipe, OpenCV, and Mido
 - Mido
 
 
-### If running headless:
+### If running headless via ssh:
 - connect pi to external monitor
 - start x server
 - execute ``export DISPLAY=:0``
@@ -20,8 +20,7 @@ Mediapipe Midi is a series of simple script that use Mediapipe, OpenCV, and Mido
 
 ## Backlog
 
-- add support for frame buffer (true headless, no x server)
-- make config.yml to support reusable elements
-- more gestures & pose detections
-- refactor for improved performance
-- outline for full pi setup in readme
+- add support for non-X frame buffer (true headless, no x server)
+- modularize MIDI and OSC commands to be called separately based on config.yaml
+- abstract the image stream so multiple MP meshes can run concurrently
+- create python launcher script to install & run dependency environment
