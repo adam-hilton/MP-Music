@@ -4,11 +4,14 @@ Mediapipe Midi is a series of simple scripts that use Mediapipe, OpenCV, Mido, a
 
 ## Dependencies & Usage
 
-### Libraries
+### Key Libraries
 - Picamera2
 - Mediapipe
 - OpenCV
 - Mido
+- Python OSC
+- PyYAML
+- PyAutoGUI
 
 
 ### If running headless via ssh:
